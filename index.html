@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequential Timers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6', // 蓝色 - 计时中
+                        warning: '#FACC15', // 柠檬黄 - 超过2/3时间
+                        neutral: '#FFFFFF', // 白色 - 未开始/已结束
+                        dark: '#1F2937',    // 深色文本
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .timer-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none;
+            }
+            .btn-hover {
+                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300;
+            }
+            .timer-transition {
+                @apply transition-colors duration-500 ease-in-out;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-dark">
+    <div class="max-w-4xl w-full mx-auto">
+        <!-- 标题 -->
+        <header class="text-center mb-10">
+            <h1 class="text-[clamp(1.8rem,5vw,3rem)] font-bold text-dark mb-2">Sequential Timers</h1>
+            <p class="text-gray-600 text-lg">Set your timers and they'll run one after another</p>
+        </header>
+        
+        <!-- 计时器容器 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- 计时器 1 -->
+            <div id="timer-1" class="timer-container bg-neutral rounded-xl p-6 timer-shadow timer-transition">
+                <div class="flex flex-col h-full">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Timer 1</h2>
+                    
+                    <!-- 时间显示 -->
+                    <div class="timer-display text-center my-6">
+                        <span id="time-1" class="text-[clamp(2rem,6vw,3.5rem)] font-bold">00:00</span>
+                    </div>
+                    
+                    <!-- 时间设置 -->
+                    <div class="time-setting mt-auto">
+                        <div class="flex items-center gap-2">
+                            <label for="minutes-1" class="text-gray-700">Minutes:</label>
+                            <input 
+                                type="number" 
+                                id="minutes-1" 
+                                min="0" 
+                                max="59" 
+                                value="1" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg input-focus"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 计时器 2 -->
+            <div id="timer-2" class="timer-container bg-neutral rounded-xl p-6 timer-shadow timer-transition">
+                <div class="flex flex-col h-full">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Timer 2</h2>
+                    
+                    <!-- 时间显示 -->
+                    <div class="timer-display text-center my-6">
+                        <span id="time-2" class="text-[clamp(2rem,6vw,3.5rem)] font-bold">00:00</span>
+                    </div>
+                    
+                    <!-- 时间设置 -->
+                    <div class="time-setting mt-auto">
+                        <div class="flex items-center gap-2">
+                            <label for="minutes-2" class="text-gray-700">Minutes:</label>
+                            <input 
+                                type="number" 
+                                id="minutes-2" 
+                                min="0" 
+                                max="59" 
+                                value="1" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg input-focus"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 计时器 3 -->
+            <div id="timer-3" class="timer-container bg-neutral rounded-xl p-6 timer-shadow timer-transition">
+                <div class="flex flex-col h-full">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Timer 3</h2>
+                    
+                    <!-- 时间显示 -->
+                    <div class="timer-display text-center my-6">
+                        <span id="time-3" class="text-[clamp(2rem,6vw,3.5rem)] font-bold">00:00</span>
+                    </div>
+                    
+                    <!-- 时间设置 -->
+                    <div class="time-setting mt-auto">
+                        <div class="flex items-center gap-2">
+                            <label for="minutes-3" class="text-gray-700">Minutes:</label>
+                            <input 
+                                type="number" 
+                                id="minutes-3" 
+                                min="0" 
+                                max="59" 
+                                value="1" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg input-focus"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <div class="flex flex-wrap justify-center gap-4">
+            <button id="start-btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 btn-hover">
+                <i class="fa fa-play"></i>
+                <span>Start Timers</span>
+            </button>
+            <button id="reset-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 btn-hover">
+                <i class="fa fa-refresh"></i>
+                <span>Reset All</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 计时器状态管理
+        const timers = {
+            1: {
+                element: document.getElementById('timer-1'),
+                timeDisplay: document.getElementById('time-1'),
+                input: document.getElementById('minutes-1'),
+                totalSeconds: 60,
+                remainingSeconds: 60,
+                interval: null,
+                isRunning: false,
+                isCompleted: false
+            },
+            2: {
+                element: document.getElementById('timer-2'),
+                timeDisplay: document.getElementById('time-2'),
+                input: document.getElementById('minutes-2'),
+                totalSeconds: 60,
+                remainingSeconds: 60,
+                interval: null,
+                isRunning: false,
+                isCompleted: false
+            },
+            3: {
+                element: document.getElementById('timer-3'),
+                timeDisplay: document.getElementById('time-3'),
+                input: document.getElementById('minutes-3'),
+                totalSeconds: 60,
+                remainingSeconds: 60,
+                interval: null,
+                isRunning: false,
+                isCompleted: false
+            }
+        };
+
+        // 当前活动的计时器
+        let activeTimer = null;
+        let isSequenceRunning = false;
+
+        // 格式化时间为 MM:SS 格式
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 更新计时器显示
+        function updateTimerDisplay(timerId) {
+            const timer = timers[timerId];
+            timer.timeDisplay.textContent = formatTime(timer.remainingSeconds);
+            
+            // 更新背景颜色
+            if (timer.isRunning) {
+                const progress = timer.remainingSeconds / timer.totalSeconds;
+                if (progress <= 1/3) {
+                    timer.element.classList.remove('bg-primary', 'bg-neutral');
+                    timer.element.classList.add('bg-warning');
+                } else {
+                    timer.element.classList.remove('bg-warning', 'bg-neutral');
+                    timer.element.classList.add('bg-primary');
+                }
+            } else {
+                timer.element.classList.remove('bg-primary', 'bg-warning');
+                timer.element.classList.add('bg-neutral');
+            }
+        }
+
+        // 开始单个计时器
+        function startTimer(timerId) {
+            // 停止任何正在运行的计时器
+            if (activeTimer) {
+                stopTimer(activeTimer);
+            }
+            
+            const timer = timers[timerId];
+            
+            // 如果计时器已完成，重置它
+            if (timer.isCompleted) {
+                resetTimer(timerId);
+            }
+            
+            timer.isRunning = true;
+            activeTimer = timerId;
+            
+            // 更新显示
+            updateTimerDisplay(timerId);
+            
+            // 设置间隔计时器
+            timer.interval = setInterval(() => {
+                timer.remainingSeconds--;
+                updateTimerDisplay(timerId);
+                
+                // 检查是否计时结束
+                if (timer.remainingSeconds <= 0) {
+                    completeTimer(timerId);
+                }
+            }, 1000);
+        }
+
+        // 停止单个计时器
+        function stopTimer(timerId) {
+            const timer = timers[timerId];
+            if (timer.interval) {
+                clearInterval(timer.interval);
+                timer.interval = null;
+            }
+            timer.isRunning = false;
+            updateTimerDisplay(timerId);
+        }
+
+        // 完成计时器（时间结束）
+        function completeTimer(timerId) {
+            stopTimer(timerId);
+            timers[timerId].isCompleted = true;
+            
+            // 播放提示音
+            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAA=');
+            audio.play().catch(e => console.log("提示音播放失败:", e));
+            
+            // 启动下一个计时器
+            const nextTimerId = parseInt(timerId) + 1;
+            if (timers[nextTimerId]) {
+                setTimeout(() => {
+                    startTimer(nextTimerId);
+                }, 1000);
+            } else {
+                // 所有计时器完成
+                isSequenceRunning = false;
+            }
+        }
+
+        // 重置单个计时器
+        function resetTimer(timerId) {
+            const timer = timers[timerId];
+            stopTimer(timerId);
+            // 获取输入的分钟数，默认为1分钟
+            const minutes = parseInt(timer.input.value) || 1;
+            timer.totalSeconds = minutes * 60;
+            timer.remainingSeconds = minutes * 60;
+            timer.isCompleted = false;
+            updateTimerDisplay(timerId);
+        }
+
+        // 重置所有计时器
+        function resetAllTimers() {
+            // 停止所有计时器
+            Object.keys(timers).forEach(timerId => {
+                stopTimer(timerId);
+            });
+            
+            // 重置状态
+            activeTimer = null;
+            isSequenceRunning = false;
+            
+            // 重置每个计时器
+            Object.keys(timers).forEach(timerId => {
+                resetTimer(timerId);
+            });
+        }
+
+        // 开始计时器序列
+        function startTimersSequence() {
+            if (!isSequenceRunning) {
+                isSequenceRunning = true;
+                // 先更新所有计时器的总时间
+                Object.keys(timers).forEach(timerId => {
+                    const timer = timers[timerId];
+                    const minutes = parseInt(timer.input.value) || 1;
+                    timer.totalSeconds = minutes * 60;
+                    timer.remainingSeconds = minutes * 60;
+                    timer.isCompleted = false;
+                    updateTimerDisplay(timerId);
+                });
+                
+                // 从第一个计时器开始
+                startTimer('1');
+            }
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 开始按钮
+            document.getElementById('start-btn').addEventListener('click', startTimersSequence);
+            
+            // 重置按钮
+            document.getElementById('reset-btn').addEventListener('click', resetAllTimers);
+            
+            // 监听分钟输入变化
+            Object.keys(timers).forEach(timerId => {
+                const timer = timers[timerId];
+                timer.input.addEventListener('change', () => {
+                    // 只有在计时器未运行时才更新
+                    if (!timer.isRunning) {
+                        const minutes = parseInt(timer.input.value) || 1;
+                        timer.totalSeconds = minutes * 60;
+                        timer.remainingSeconds = minutes * 60;
+                        updateTimerDisplay(timerId);
+                    }
+                });
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化所有计时器显示
+            Object.keys(timers).forEach(timerId => {
+                updateTimerDisplay(timerId);
+            });
+            
+            // 初始化事件监听器
+            initEventListeners();
+        });
+    </script>
+</body>
+</html>
